@@ -1,0 +1,20 @@
+[Desktop Entry]
+Name=KWin Rectangle
+Comment=Shortcuts to move windows around.
+Icon=preferences-system-windows-script-test
+
+X-Plasma-API=javascript
+X-Plasma-MainScript=code/main.js
+
+X-KDE-PluginInfo-Author=Álan Crístoffer e Sousa
+X-KDE-PluginInfo-Email=acristoffers@gmail.com
+X-KDE-PluginInfo-Name=kwin-rectangle
+X-KDE-PluginInfo-Version=1.0.0
+X-KDE-PluginInfo-License=GPL
+
+X-KDE-ServiceTypes=KWin/Script,KCModule
+X-KDE-Library=kwin/effects/configs/kcm_kwin4_genericscripted
+X-KDE-PluginKeyword=kwin-rectangle
+X-KDE-ParentComponents=kwin-rectangle
+
+Type=Service
