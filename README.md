@@ -41,5 +41,5 @@ button to change inner and outer padding.
 
 # Uninstallation
 
-Uninstall the package with `plasmapkg2 -t kwinscript -r kwin-thirds`.
+Uninstall the package with `plasmapkg2 -t kwinscript -r kwin-rectangle`.
 Remove the shortcuts with `qdbus org.kde.kglobalaccel /component/kwin cleanUp`.
