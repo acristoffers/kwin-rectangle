@@ -1,26 +1,21 @@
 {
-    "KPlugin": {
-        "Authors": [
-            {
-                "Email": "acristoffers@gmail.com",
-                "Name": "Álan Crístoffer e Sousa"
-            }
-        ],
-        "Description": "Shortcuts to move windows around.",
-        "Icon": "preferences-system-windows-script-test",
-        "Id": "kwin-rectangle",
-        "License": "GPL",
-        "Name": "KWin Rectangle",
-        "ServiceTypes": [
-            "KWin/Script",
-            "KCModule"
-        ],
-        "Version": "1.0.0"
-    },
-    "X-KDE-ParentComponents": [
-        "kwin-rectangle"
+  "KPlugin": {
+    "Authors": [
+      {
+        "Email": "acristoffers@gmail.com",
+        "Name": "Álan Crístoffer e Sousa"
+      }
     ],
-    "X-KDE-PluginKeyword": "kwin-rectangle",
-    "X-Plasma-API": "javascript",
-    "X-Plasma-MainScript": "code/main.js"
+    "Description": "Shortcuts to move windows around.",
+    "Icon": "preferences-system-windows-script-test",
+    "Id": "kwin-rectangle",
+    "License": "GPL",
+    "Name": "KWin Rectangle",
+    "ServiceTypes": ["KWin/Script", "KCModule"],
+    "Version": "1.1.0"
+  },
+  "X-KDE-ParentComponents": ["kwin-rectangle"],
+  "X-KDE-PluginKeyword": "kwin-rectangle",
+  "X-Plasma-API": "javascript",
+  "X-Plasma-MainScript": "code/main.js"
 }
