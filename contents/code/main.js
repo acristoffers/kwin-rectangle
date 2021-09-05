@@ -269,8 +269,8 @@ function manage(division) {
       break;
   }
 
-  geometry.x = nx;
-  geometry.y = ny;
+  geometry.x = nx + area.x;
+  geometry.y = ny + area.y;
   geometry.width = nw;
   geometry.height = nh;
   workspace.activeClient.frameGeometry = geometry;
