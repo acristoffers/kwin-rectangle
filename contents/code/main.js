@@ -47,10 +47,12 @@ const divisions = {
   CENTERED_QUARTER: 35
 }
 
-function manage (division) {
-  if (!workspace.activeClient.normalWindow && !workspace.activeClient.utility) {
-    return
-  }
+const savedGeometries = []
+
+function manage(division) {
+  if (!workspace.activeClient.normalWindow && !workspace.activeClient.utility) { return }
+
+  console.log(JSON.stringify(savedGeometries))
 
   const area = workspace.clientArea(KWin.PlacementArea, workspace.activeScreen, workspace.currentDesktop)
   const geometry = workspace.activeClient.frameGeometry
@@ -269,6 +271,8 @@ function manage (division) {
       break
   }
 
+  saveGeometry(workspace.activeClient)
+
   workspace.activeClient.geometry = {
     x: nx + area.x,
     y: ny + area.y,
@@ -277,7 +281,31 @@ function manage (division) {
   }
 }
 
-function shortcut (text, shortcut, placement) {
+// inspired by https://github.com/gerritdevriese/kzones
+function saveGeometry(client) {
+  const geometry = {
+    id: String(client),
+    x: client.geometry.x,
+    y: client.geometry.y,
+    width: client.geometry.width,
+    height: client.geometry.height
+  }
+  const exists = savedGeometries.findIndex((g) => g.id === geometry.id)
+  if (exists !== -1 && !client.snapped) savedGeometries[exists] = geometry
+  if (!client.snapped) savedGeometries.push(geometry)
+  client.snapped = true
+}
+
+function restoreGeometry(client) {
+  if (!client.snapped) return
+  const geometry = savedGeometries.find((g) => g.id === String(client))
+  client.snapped = false
+  if (!geometry) return
+  client.geometry = { width: geometry.width, height: geometry.height }
+  savedGeometries.splice(savedGeometries.findIndex((g) => (!!g && g.id === String(client))), 1)
+}
+
+function shortcut(text, shortcut, placement) {
   text = 'Rectangle: ' + text
   shortcut = 'Ctrl+Meta+' + shortcut
   registerShortcut(text, text, shortcut, () => manage(placement))
@@ -325,3 +353,20 @@ shortcut('Center', 'C', divisions.CENTER)
 shortcut('Maximized', 'Return', divisions.MAX.ALL)
 shortcut('Almost Maximized', 'Shift+Return', divisions.MAX_SPACED)
 shortcut('Centered Quarter', 'Alt+C', divisions.CENTERED_QUARTER)
+
+function registerClient(client) {
+  if (!client.normalWindow) return
+  client.clientStartUserMovedResized.connect(restoreGeometry)
+}
+
+function unregisterClient(client) {
+  if (!client.normalWindow) return
+  client.clientStepUserMovedResized.disconnect(restoreGeometry)
+  savedGeometries.splice(savedGeometries.findIndex((g) => (!!g && g.id === String(client))), 1)
+}
+
+workspace.clientList().forEach(registerClient);
+workspace.clientAdded.connect(registerClient);
+workspace.clientRemoved.connect(unregisterClient);
+
+console.log(JSON.stringify(workspace.cursorPos))
