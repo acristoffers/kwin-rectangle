@@ -52,8 +52,6 @@ const savedGeometries = []
 function manage(division) {
   if (!workspace.activeClient.normalWindow && !workspace.activeClient.utility) { return }
 
-  console.log(JSON.stringify(savedGeometries))
-
   const area = workspace.clientArea(KWin.PlacementArea, workspace.activeScreen, workspace.currentDesktop)
   const geometry = workspace.activeClient.frameGeometry
   const ip = readConfig('InnerPadding', 8)
@@ -368,5 +366,3 @@ function unregisterClient(client) {
 workspace.clientList().forEach(registerClient);
 workspace.clientAdded.connect(registerClient);
 workspace.clientRemoved.connect(unregisterClient);
-
-console.log(JSON.stringify(workspace.cursorPos))
