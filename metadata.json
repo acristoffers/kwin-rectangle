@@ -2,7 +2,7 @@
   "KPlugin": {
     "Authors": [
       {
-        "Email": "acristoffers@gmail.com",
+        "Email": "acristoffers@startmail.com",
         "Name": "Álan Crístoffer e Sousa"
       }
     ],
@@ -12,7 +12,7 @@
     "License": "GPL",
     "Name": "KWin Rectangle",
     "ServiceTypes": ["KWin/Script", "KCModule"],
-    "Version": "1.1.1"
+    "Version": "1.2.0"
   },
   "X-KDE-ParentComponents": ["kwin-rectangle"],
   "X-KDE-PluginKeyword": "kwin-rectangle",
