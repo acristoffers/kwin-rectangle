@@ -7,14 +7,14 @@ const divisions = {
     FIRST: 30,
     SECOND: 31,
     THIRD: 32,
-    FOURTH: 34
+    FOURTH: 34,
   },
   THIRDS: {
     LEFT: 5,
     CENTER: 6,
     RIGHT: 7,
     TWO_LEFT: 8,
-    TWO_RIGHT: 9
+    TWO_RIGHT: 9,
   },
   SIXTHS: {
     NW: 10,
@@ -22,37 +22,43 @@ const divisions = {
     NE: 12,
     SW: 13,
     S: 14,
-    SE: 15
+    SE: 15,
   },
   HALVES: {
     LEFT: 16,
     CENTER: 17,
     RIGHT: 18,
     TOP: 22,
-    BOTTOM: 23
+    BOTTOM: 23,
   },
   CENTER: 19,
   MAX: {
     ALL: 20,
     HEIGHT: 24,
-    WIDTH: 25
+    WIDTH: 25,
   },
   MOVE: {
     LEFT: 26,
     TOP: 27,
     RIGHT: 28,
-    BOTTOM: 29
+    BOTTOM: 29,
   },
   MAX_SPACED: 21,
-  CENTERED_QUARTER: 35
+  CENTERED_QUARTER: 35,
 }
 
 const savedGeometries = []
 
 function manage(division) {
-  if (!workspace.activeClient.normalWindow && !workspace.activeClient.utility) { return }
+  if (!workspace.activeClient.normalWindow && !workspace.activeClient.utility) {
+    return
+  }
 
-  const area = workspace.clientArea(KWin.PlacementArea, workspace.activeScreen, workspace.currentDesktop)
+  const area = workspace.clientArea(
+    KWin.PlacementArea,
+    workspace.activeScreen,
+    workspace.currentDesktop
+  )
   const geometry = workspace.activeClient.frameGeometry
   const ip = readConfig('InnerPadding', 8)
   const op = readConfig('OuterPadding', 8)
@@ -275,7 +281,7 @@ function manage(division) {
     x: nx + area.x,
     y: ny + area.y,
     width: nw,
-    height: nh
+    height: nh,
   }
 }
 
@@ -286,21 +292,38 @@ function saveGeometry(client) {
     x: client.geometry.x,
     y: client.geometry.y,
     width: client.geometry.width,
-    height: client.geometry.height
+    height: client.geometry.height,
   }
+
   const exists = savedGeometries.findIndex((g) => g.id === geometry.id)
-  if (exists !== -1 && !client.snapped) savedGeometries[exists] = geometry
-  if (!client.snapped) savedGeometries.push(geometry)
+  if (exists !== -1 && !client.snapped) {
+    savedGeometries[exists] = geometry
+  }
+
+  if (!client.snapped) {
+    savedGeometries.push(geometry)
+  }
+
   client.snapped = true
 }
 
 function restoreGeometry(client) {
-  if (!client.snapped) return
+  if (!client.snapped) {
+    return
+  }
+
   const geometry = savedGeometries.find((g) => g.id === String(client))
   client.snapped = false
-  if (!geometry) return
+
+  if (!geometry) {
+    return
+  }
+
   client.geometry = { width: geometry.width, height: geometry.height }
-  savedGeometries.splice(savedGeometries.findIndex((g) => (!!g && g.id === String(client))), 1)
+  savedGeometries.splice(
+    savedGeometries.findIndex((g) => !!g && g.id === String(client)),
+    1
+  )
 }
 
 function shortcut(text, shortcut, placement) {
@@ -353,16 +376,25 @@ shortcut('Almost Maximized', 'Shift+Return', divisions.MAX_SPACED)
 shortcut('Centered Quarter', 'Alt+C', divisions.CENTERED_QUARTER)
 
 function registerClient(client) {
-  if (!client.normalWindow) return
+  if (!client.normalWindow) {
+    return
+  }
+
   client.clientStartUserMovedResized.connect(restoreGeometry)
 }
 
 function unregisterClient(client) {
-  if (!client.normalWindow) return
+  if (!client.normalWindow) {
+    return
+  }
+
   client.clientStepUserMovedResized.disconnect(restoreGeometry)
-  savedGeometries.splice(savedGeometries.findIndex((g) => (!!g && g.id === String(client))), 1)
+  savedGeometries.splice(
+    savedGeometries.findIndex((g) => !!g && g.id === String(client)),
+    1
+  )
 }
 
-workspace.clientList().forEach(registerClient);
-workspace.clientAdded.connect(registerClient);
-workspace.clientRemoved.connect(unregisterClient);
+workspace.clientList().forEach(registerClient)
+workspace.clientAdded.connect(registerClient)
+workspace.clientRemoved.connect(unregisterClient)
