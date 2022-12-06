@@ -47,8 +47,6 @@ const divisions = {
   CENTERED_QUARTER: 35,
 }
 
-const savedGeometries = []
-
 function manage(division) {
   if (!workspace.activeClient.normalWindow && !workspace.activeClient.utility) {
     return
@@ -285,45 +283,23 @@ function manage(division) {
   }
 }
 
-// inspired by https://github.com/gerritdevriese/kzones
 function saveGeometry(client) {
-  const geometry = {
-    id: String(client),
-    x: client.geometry.x,
-    y: client.geometry.y,
-    width: client.geometry.width,
-    height: client.geometry.height,
-  }
-
-  const exists = savedGeometries.findIndex((g) => g.id === geometry.id)
-  if (exists !== -1 && !client.snapped) {
-    savedGeometries[exists] = geometry
-  }
-
-  if (!client.snapped) {
-    savedGeometries.push(geometry)
-  }
-
+  const geometry = { width: client.geometry.width, height: client.geometry.height }
+  client.clientStepUserMovedResized.connect(restoreGeometry)
+  client.prev_geometry = geometry
   client.snapped = true
 }
 
 function restoreGeometry(client) {
-  if (!client.snapped) {
-    return
-  }
+  console.log(client.internalId, client.snapped, JSON.stringify(client.prev_geometry));
+  if (!client.snapped || !client.prev_geometry) { return }
 
-  const geometry = savedGeometries.find((g) => g.id === String(client))
-  client.snapped = false
+  client.geometry = client.prev_geometry
 
-  if (!geometry) {
-    return
-  }
+  delete client.prev_geometry
+  delete client.snapped
 
-  client.geometry = { width: geometry.width, height: geometry.height }
-  savedGeometries.splice(
-    savedGeometries.findIndex((g) => !!g && g.id === String(client)),
-    1
-  )
+  client.clientStepUserMovedResized.disconnect(restoreGeometry)
 }
 
 function shortcut(text, shortcut, placement) {
@@ -376,25 +352,11 @@ shortcut('Almost Maximized', 'Shift+Return', divisions.MAX_SPACED)
 shortcut('Centered Quarter', 'Alt+C', divisions.CENTERED_QUARTER)
 
 function registerClient(client) {
-  if (!client.normalWindow) {
-    return
-  }
-
+  if (!client.normalWindow) { return }
   client.clientStartUserMovedResized.connect(restoreGeometry)
 }
 
 function unregisterClient(client) {
-  if (!client.normalWindow) {
-    return
-  }
-
+  if (!client.normalWindow) { return }
   client.clientStepUserMovedResized.disconnect(restoreGeometry)
-  savedGeometries.splice(
-    savedGeometries.findIndex((g) => !!g && g.id === String(client)),
-    1
-  )
 }
-
-workspace.clientList().forEach(registerClient)
-workspace.clientAdded.connect(registerClient)
-workspace.clientRemoved.connect(unregisterClient)
