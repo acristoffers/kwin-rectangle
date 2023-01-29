@@ -276,23 +276,27 @@ function manage(division) {
   saveGeometry(workspace.activeClient)
 
   workspace.activeClient.geometry = {
-    x: nx + area.x,
-    y: ny + area.y,
-    width: nw,
-    height: nh,
+    x: Math.round(nx + area.x),
+    y: Math.round(ny + area.y),
+    width: Math.round(nw),
+    height: Math.round(nh),
   }
 }
 
 function saveGeometry(client) {
-  const geometry = { width: client.geometry.width, height: client.geometry.height }
+  const geometry = {
+    width: client.geometry.width,
+    height: client.geometry.height,
+  }
   client.clientStepUserMovedResized.connect(restoreGeometry)
   client.prev_geometry = geometry
   client.snapped = true
 }
 
 function restoreGeometry(client) {
-  console.log(client.internalId, client.snapped, JSON.stringify(client.prev_geometry));
-  if (!client.snapped || !client.prev_geometry) { return }
+  if (!client.snapped || !client.prev_geometry) {
+    return
+  }
 
   client.geometry = client.prev_geometry
 
@@ -352,11 +356,15 @@ shortcut('Almost Maximized', 'Shift+Return', divisions.MAX_SPACED)
 shortcut('Centered Quarter', 'Alt+C', divisions.CENTERED_QUARTER)
 
 function registerClient(client) {
-  if (!client.normalWindow) { return }
+  if (!client.normalWindow) {
+    return
+  }
   client.clientStartUserMovedResized.connect(restoreGeometry)
 }
 
 function unregisterClient(client) {
-  if (!client.normalWindow) { return }
+  if (!client.normalWindow) {
+    return
+  }
   client.clientStepUserMovedResized.disconnect(restoreGeometry)
 }
