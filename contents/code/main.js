@@ -14,6 +14,7 @@ const divisions = {
     CENTER: 6,
     RIGHT: 7,
     TWO_LEFT: 8,
+    TWO_CENTER: 36,
     TWO_RIGHT: 9,
   },
   SIXTHS: {
@@ -113,6 +114,12 @@ function manage(division) {
       nw = (2 * (area.width - 2 * op - 2 * ip)) / 3 + ip
       nh = area.height - 2 * op
       nx = op
+      ny = op
+      break
+    case divisions.THIRDS.TWO_CENTER:
+      nw = (2 * (area.width - 2 * op - 2 * ip)) / 3 + ip
+      nh = area.height - 2 * op
+      nx = (area.width - nw) / 2
       ny = op
       break
     case divisions.THIRDS.TWO_RIGHT:
@@ -327,6 +334,7 @@ shortcut('Thirds: Second', 'F', divisions.THIRDS.CENTER)
 shortcut('Thirds: Third', 'G', divisions.THIRDS.RIGHT)
 
 shortcut('Two Thirds: First', 'E', divisions.THIRDS.TWO_LEFT)
+shortcut('Two Thirds: Center', 'R', divisions.THIRDS.TWO_CENTER)
 shortcut('Two Thirds: Second', 'T', divisions.THIRDS.TWO_RIGHT)
 
 shortcut('Sixth: Top Left', 'Shift+U', divisions.SIXTHS.NW)
