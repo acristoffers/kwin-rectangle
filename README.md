@@ -37,6 +37,14 @@ It allows manual tiling with the following shortcuts (configurable in settings):
 - Almost Maximized: `Ctrl+Meta+Shift+Return`
 - Centered Quarter: `Ctrl+Meta+Alt+C`
 
+# Multi-monitor Quirk
+
+Kwin, by default, has a focus-follows-mouse policy, meaning that the tilling operation will
+happen on the monitor where the mouse is, and not where the window is. To change this behaviour,
+go to
+`System Settings` -> `Window Management` -> `Window Behaviour` -> `Focus` -> `Multiscreen behaviour`
+and deselect the `Active screen follows mouse` toggle.
+
 # Installation
 
 Run `./install.sh`
