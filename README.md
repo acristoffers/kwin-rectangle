@@ -55,10 +55,6 @@ Check if there were no shortcut conflict by going to "System Settings" ->
 "Shortcuts" -> "Global Keyboard Shortcuts" -> "KWin" and searching for
 "Rectangle".
 
-Installing with this script is preferred, as it will create the necessary
-symlink. If you install with the kwinscript file, you may not see the settings
-button to change inner and outer padding.
-
 # Uninstallation
 
 Run `./uninstall.sh`
