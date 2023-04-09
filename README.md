@@ -2,40 +2,55 @@ A kwin script to mimic macOS's Rectangle tiling options in Plasma.
 
 It allows manual tiling with the following shortcuts (configurable in settings):
 
-- Quarter: Top Left: `Ctrl+Meta+U`
-- Quarter: Top Right: `Ctrl+Meta+I`
-- Quarter: Bottom Left: `Ctrl+Meta+J`
-- Quarter: Bottom Right: `Ctrl+Meta+K`
-- Fourth: First: `Ctrl+Meta+V`
-- Fourth: Second: `Ctrl+Meta+B`
-- Fourth: Third: `Ctrl+Meta+N`
-- Fourth: Fourth: `Ctrl+Meta+M`
-- Thirds: First: `Ctrl+Meta+D`
-- Thirds: Second: `Ctrl+Meta+F`
-- Thirds: Third: `Ctrl+Meta+G`
-- Two Thirds: First: `Ctrl+Meta+E`
-- Two Thirds: Second: `Ctrl+Meta+T`
-- Sixth: Top Left: `Ctrl+Meta+Shift+U`
-- Sixth: Top Center: `Ctrl+Meta+Shift+I`
-- Sixth: Top Right: `Ctrl+Meta+Shift+O`
-- Sixth: Bottom Left: `Ctrl+Meta+Shift+J`
-- Sixth: Bottom Center: `Ctrl+Meta+Shift+K`
-- Sixth: Bottom Right: `Ctrl+Meta+Shift+L`
-- Halves: Left: `Ctrl+Meta+Left`
-- Halves: Center: `Ctrl+Meta+Shift+C`
-- Halves: Right: `Ctrl+Meta+Right`
-- Halves: Top: `Ctrl+Meta+Up`
-- Halves: Bottom: `Ctrl+Meta+Down`
-- Move: Left: `Ctrl+Meta+Alt+Left`
-- Move: Right: `Ctrl+Meta+Alt+Right`
-- Move: Top: `Ctrl+Meta+Alt+Up`
-- Move: Bottom: `Ctrl+Meta+Alt+Down`
-- Maximize Height: `Ctrl+Meta+Shift+Alt+Up`
-- Maximize Width: `Ctrl+Meta+Shift+Alt+Right`
-- Center: `Ctrl+Meta+C`
-- Maximized: `Ctrl+Meta+Return`
-- Almost Maximized: `Ctrl+Meta+Shift+Return`
-- Centered Quarter: `Ctrl+Meta+Alt+C`
+- Quarter: Top Left: `Super+Ctrl+U`
+- Quarter: Top Right: `Super+Ctrl+I`
+- Quarter: Bottom Left: `Super+Ctrl+J`
+- Quarter: Bottom Right: `Super+Ctrl+K`
+- Fourth: First: `Super+Ctrl+V`
+- Fourth: Second: `Super+Ctrl+B`
+- Fourth: Third: `Super+Ctrl+N`
+- Fourth: Fourth: `Super+Ctrl+M`
+- Thirds: First: `Super+Ctrl+D`
+- Thirds: Second: `Super+Ctrl+F`
+- Thirds: Third: `Super+Ctrl+G`
+- Sixth: Top Left: `Super+Ctrl+Shift+U`
+- Sixth: Top Center: `Super+Ctrl+Shift+I`
+- Sixth: Top Right: `Super+Ctrl+Shift+O`
+- Sixth: Bottom Left: `Super+Ctrl+Shift+J`
+- Sixth: Bottom Center: `Super+Ctrl+Shift+K`
+- Sixth: Bottom Right: `Super+Ctrl+Shift+L`
+- Ninth: Top Left: `Super+Ctrl+Alt+U`
+- Ninth: Top Center: `Super+Ctrl+Alt+I`
+- Ninth: Top Right: `Super+Ctrl+Alt+O`
+- Ninth: Middle Left: `Super+Ctrl+Alt+J`
+- Ninth: Middle Center: `Super+Ctrl+Alt+K`
+- Ninth: Middle Right: `Super+Ctrl+Alt+L`
+- Ninth: Bottom Left: `Super+Ctrl+Alt+N`
+- Ninth: Bottom Center: `Super+Ctrl+Alt+M`
+- Ninth: Bottom Right: `Super+Ctrl+Alt+,`
+- Halves: Center (Vertical): `Super+Ctrl+Shift+C`
+- Halves: Center (Horizontal): `Super+Ctrl+Shift+V`
+- Halves: Left: `Super+Ctrl+Left`
+- Halves: Right: `Super+Ctrl+Right`
+- Halves: Top: `Super+Ctrl+Up`
+- Halves: Bottom: `Super+Ctrl+Down`
+- Two Thirds: First: `Super+Ctrl+E`
+- Two Thirds: Second: `Super+Ctrl+T`
+- Two Thirds: Center: `Super+Ctrl+R`
+- Center: `Super+Ctrl+C`
+- Maximized: `Super+Ctrl+Return`
+- Centered Quarter: `Super+Ctrl+Alt+C`
+- Almost Maximized: `Super+Ctrl+Shift+Return`
+- Maximize Height: `Super+Ctrl+Shift+Alt+Up`
+- Maximize Width: `Super+Ctrl+Shift+Alt+Right`
+- Move: Left: `Super+Ctrl+Alt+4`
+- Move: Right: `Super+Ctrl+Alt+6`
+- Move: Top: `Super+Ctrl+Alt+8`
+- Move: Bottom: `Super+Ctrl+Alt+2`
+- Move: Top Left: `Super+Ctrl+Alt+7`
+- Move: Top Right: `Super+Ctrl+Alt+9`
+- Move: Bottom Left: `Super+Ctrl+Alt+1`
+- Move: Bottom Right: `Super+Ctrl+Alt+3`
 
 # Multi-monitor Quirk
 

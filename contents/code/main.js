@@ -1,293 +1,121 @@
-const divisions = {
-  FOURTHS: {
-    NW: 1,
-    NE: 2,
-    SW: 3,
-    SE: 4,
-    FIRST: 30,
-    SECOND: 31,
-    THIRD: 32,
-    FOURTH: 34,
-  },
-  THIRDS: {
-    LEFT: 5,
-    CENTER: 6,
-    RIGHT: 7,
-    TWO_LEFT: 8,
-    TWO_CENTER: 36,
-    TWO_RIGHT: 9,
-  },
-  SIXTHS: {
-    NW: 10,
-    N: 11,
-    NE: 12,
-    SW: 13,
-    S: 14,
-    SE: 15,
-  },
-  HALVES: {
-    LEFT: 16,
-    CENTER: 17,
-    RIGHT: 18,
-    TOP: 22,
-    BOTTOM: 23,
-  },
-  CENTER: 19,
-  MAX: {
-    ALL: 20,
-    HEIGHT: 24,
-    WIDTH: 25,
-  },
-  MOVE: {
-    LEFT: 26,
-    TOP: 27,
-    RIGHT: 28,
-    BOTTOM: 29,
-  },
-  MAX_SPACED: 21,
-  CENTERED_QUARTER: 35,
-}
-
-function manage(division) {
-  if (!workspace.activeClient.normalWindow && !workspace.activeClient.utility) {
-    return
-  }
-
-  const area = workspace.clientArea(
+function screenSize() {
+  return workspace.clientArea(
     KWin.PlacementArea,
     workspace.activeScreen,
     workspace.currentDesktop
   )
-  const geometry = workspace.activeClient.frameGeometry
-  const ip = readConfig('InnerPadding', 8)
-  const op = readConfig('OuterPadding', 8)
+}
 
-  let nw = geometry.width
-  let nh = geometry.height
-  let nx = geometry.x
-  let ny = geometry.y
+function paddings() {
+  return {
+    inner: readConfig('InnerPadding', 8),
+    outer: readConfig('OuterPadding', 8),
+  }
+}
 
-  switch (division) {
-    case divisions.FOURTHS.NW:
-      nw = (area.width - 2 * op - ip) / 2
-      nh = (area.height - 2 * op - ip) / 2
-      nx = op
-      ny = op
-      break
-    case divisions.FOURTHS.NE:
-      nw = (area.width - 2 * op - ip) / 2
-      nh = (area.height - 2 * op - ip) / 2
-      nx = op + ip + nw
-      ny = op
-      break
-    case divisions.FOURTHS.SW:
-      nw = (area.width - 2 * op - ip) / 2
-      nh = (area.height - 2 * op - ip) / 2
-      nx = op
-      ny = op + ip + nh
-      break
-    case divisions.FOURTHS.SE:
-      nw = (area.width - 2 * op - ip) / 2
-      nh = (area.height - 2 * op - ip) / 2
-      nx = op + ip + nw
-      ny = op + ip + nh
-      break
-    case divisions.THIRDS.LEFT:
-      nw = (area.width - 2 * op - 2 * ip) / 3
-      nh = area.height - 2 * op
-      nx = op
-      ny = op
-      break
-    case divisions.THIRDS.CENTER:
-      nw = (area.width - 2 * op - 2 * ip) / 3
-      nh = area.height - 2 * op
-      nx = op + nw + ip
-      ny = op
-      break
-    case divisions.THIRDS.RIGHT:
-      nw = (area.width - 2 * op - 2 * ip) / 3
-      nh = area.height - 2 * op
-      nx = op + 2 * nw + 2 * ip
-      ny = op
-      break
-    case divisions.THIRDS.TWO_LEFT:
-      nw = (2 * (area.width - 2 * op - 2 * ip)) / 3 + ip
-      nh = area.height - 2 * op
-      nx = op
-      ny = op
-      break
-    case divisions.THIRDS.TWO_CENTER:
-      nw = (2 * (area.width - 2 * op - 2 * ip)) / 3 + ip
-      nh = area.height - 2 * op
-      nx = (area.width - nw) / 2
-      ny = op
-      break
-    case divisions.THIRDS.TWO_RIGHT:
-      nw = (2 * (area.width - 2 * op - 2 * ip)) / 3 + ip
-      nh = area.height - 2 * op
-      nx = area.width - nw - op
-      ny = op
-      break
-    case divisions.SIXTHS.NW:
-      nw = (area.width - 2 * op - 2 * ip) / 3
-      nh = (area.height - 2 * op - ip) / 2
-      nx = op
-      ny = op
-      break
-    case divisions.SIXTHS.N:
-      nw = (area.width - 2 * op - 2 * ip) / 3
-      nh = (area.height - 2 * op - ip) / 2
-      nx = op + ip + nw
-      ny = op
-      break
-    case divisions.SIXTHS.NE:
-      nw = (area.width - 2 * op - 2 * ip) / 3
-      nh = (area.height - 2 * op - ip) / 2
-      nx = op + 2 * ip + 2 * nw
-      ny = op
-      break
-    case divisions.SIXTHS.SW:
-      nw = (area.width - 2 * op - 2 * ip) / 3
-      nh = (area.height - 2 * op - ip) / 2
-      nx = op
-      ny = op + ip + nh
-      break
-    case divisions.SIXTHS.S:
-      nw = (area.width - 2 * op - 2 * ip) / 3
-      nh = (area.height - 2 * op - ip) / 2
-      nx = op + ip + nw
-      ny = op + ip + nh
-      break
-    case divisions.SIXTHS.SE:
-      nw = (area.width - 2 * op - 2 * ip) / 3
-      nh = (area.height - 2 * op - ip) / 2
-      nx = op + 2 * ip + 2 * nw
-      ny = op + ip + nh
-      break
-    case divisions.HALVES.LEFT:
-      nw = (area.width - 2 * op - ip) / 2
-      nh = area.height - 2 * op
-      nx = op
-      ny = op
-      break
-    case divisions.HALVES.RIGHT:
-      nw = (area.width - 2 * op - ip) / 2
-      nh = area.height - 2 * op
-      nx = nw + op + ip
-      ny = op
-      break
-    case divisions.HALVES.CENTER:
-      nw = (area.width - 2 * op - ip) / 2
-      nh = area.height - 2 * op
-      nx = (area.width - nw) / 2
-      ny = op
-      break
-    case divisions.HALVES.TOP:
-      nw = area.width - 2 * op
-      nh = (area.height - 2 * op - ip) / 2
-      nx = op
-      ny = op
-      break
-    case divisions.HALVES.BOTTOM:
-      nw = area.width - 2 * op
-      nh = (area.height - 2 * op - ip) / 2
-      nx = op
-      ny = nh + op + ip
-      break
-    case divisions.CENTER:
-      nw = geometry.width
-      nh = geometry.height
-      nx = (area.width - nw) / 2
-      ny = (area.height - nh) / 2
-      break
-    case divisions.MAX.ALL:
-      nw = area.width - 2 * op
-      nh = area.height - 2 * op
-      nx = op
-      ny = op
-      break
-    case divisions.MAX_SPACED:
-      nw = ((area.width - ip - 2 * op) * 9) / 10
-      nh = ((area.height - ip - 2 * op) * 9) / 10
-      nx = (area.width - nw) / 2
-      ny = (area.height - nh) / 2
-      break
-    case divisions.MAX.HEIGHT:
-      nw = geometry.width
-      nh = area.height - 2 * op
-      nx = geometry.x
-      ny = op
-      break
-    case divisions.MAX.WIDTH:
-      nw = area.width - 2 * op
-      nh = geometry.height
-      nx = op
-      ny = geometry.y
-      break
-    case divisions.MOVE.LEFT:
-      nw = geometry.width
-      nh = geometry.height
-      nx = op
-      ny = (area.height - 2 * op - nh) / 2
-      break
-    case divisions.MOVE.RIGHT:
-      nw = geometry.width
-      nh = geometry.height
-      nx = area.width - op - nw
-      ny = (area.height - 2 * op - nh) / 2
-      break
-    case divisions.MOVE.TOP:
-      nw = geometry.width
-      nh = geometry.height
-      nx = (area.width - 2 * op - nw) / 2
-      ny = op
-      break
-    case divisions.MOVE.BOTTOM:
-      nw = geometry.width
-      nh = geometry.height
-      nx = (area.width - 2 * op - nw) / 2
-      ny = area.height - op - nh
-      break
-    case divisions.FOURTHS.FIRST:
-      nw = (area.width - 2 * op - 3 * ip) / 4
-      nh = area.height - 2 * op
-      nx = op
-      ny = op
-      break
-    case divisions.FOURTHS.SECOND:
-      nw = (area.width - 2 * op - 3 * ip) / 4
-      nh = area.height - 2 * op
-      nx = op + ip + nw
-      ny = op
-      break
-    case divisions.FOURTHS.THIRD:
-      nw = (area.width - 2 * op - 3 * ip) / 4
-      nh = area.height - 2 * op
-      nx = op + 2 * ip + 2 * nw
-      ny = op
-      break
-    case divisions.FOURTHS.FOURTH:
-      nw = (area.width - 2 * op - 3 * ip) / 4
-      nh = area.height - 2 * op
-      nx = op + 3 * ip + 3 * nw
-      ny = op
-      break
-    case divisions.CENTERED_QUARTER:
-      nw = (area.width - 2 * op - ip) / 2
-      nh = (area.height - 2 * op - ip) / 2
-      nx = (area.width - nw) / 2
-      ny = (area.height - nh) / 2
-      break
+function geometryForGrid(index, rowSpan, colSpan, rows, cols) {
+  if (index >= rows * cols || index < 0) {
+    return workspace.activeClient.geometry
+  }
+
+  const screen = screenSize()
+  const pad = paddings()
+
+  const availW = screen.width - (cols - 1) * pad.inner - 2 * pad.outer
+  const availH = screen.height - (rows - 1) * pad.inner - 2 * pad.outer
+  const singleWinW = availW / cols
+  const singleWinH = availH / rows
+  const winW = colSpan * singleWinW + (colSpan - 1) * pad.inner
+  const winH = rowSpan * singleWinH + (rowSpan - 1) * pad.inner
+
+  const winJ = index % cols
+  const winI = (index - winJ) / cols
+  const winX = screen.x + pad.outer + winJ * (singleWinW + pad.inner)
+  const winY = screen.y + pad.outer + winI * (singleWinH + pad.inner)
+
+  return {
+    width: Math.round(winW),
+    height: Math.round(winH),
+    x: Math.round(winX),
+    y: Math.round(winY),
+  }
+}
+
+function center(geometry) {
+  const screen = screenSize()
+  return {
+    width: geometry.width,
+    height: geometry.height,
+    x: Math.round((screen.width - geometry.width) / 2),
+    y: Math.round((screen.height - geometry.height) / 2),
+  }
+}
+
+function manage(index, rs, cs, r, c) {
+  /*
+   * Index is the zero-index of the square in the grid.
+   * For example, if index=2, r=2, c=2, then
+   * you get the first column and second row:
+   * |--0--|--1--|
+   * |##2##|--3--|
+   * Negative indexes have special meanings:
+   * -1: Just center the window
+   * -2: Resize and center
+   * -3: Maximize window's width
+   * -4: Maximize window's height
+   * -5: Move window in rs,cs direction
+   */
+  if (!workspace.activeClient.normalWindow && !workspace.activeClient.utility) {
+    return
   }
 
   saveGeometry(workspace.activeClient)
 
-  workspace.activeClient.geometry = {
-    x: Math.round(nx + area.x),
-    y: Math.round(ny + area.y),
-    width: Math.round(nw),
-    height: Math.round(nh),
+  // The object that comes from workspace.activeClient.geometry is weird and
+  // won't update the size in many cases. It's better to create a new one so
+  // KWin can detect the changes properly
+  let geometry = {
+    width: workspace.activeClient.geometry.width,
+    height: workspace.activeClient.geometry.height,
+    x: workspace.activeClient.geometry.x,
+    y: workspace.activeClient.geometry.y,
   }
+
+  if (index >= 0) {
+    geometry = geometryForGrid(index, rs, cs, r, c)
+  } else if (index == -2) {
+    geometry = geometryForGrid(1, rs, cs, r, c)
+  } else if (index == -3) {
+    const full = geometryForGrid(0, 1, 1, 1, 1)
+    geometry.x = full.x
+    geometry.width = full.width
+  } else if (index == -4) {
+    const full = geometryForGrid(0, 1, 1, 1, 1)
+    geometry.y = full.y
+    geometry.height = full.height
+  } else if (index == -5) {
+    if (workspace.activeClient.rectangleArgs != null) {
+      ;[index, prs, pcs, pr, pc] = workspace.activeClient.rectangleArgs
+      let j = index % pc
+      let i = (index - j) / pc
+      j = Math.min(pc - pcs, Math.max(0, j + rs))
+      i = Math.min(pr - prs, Math.max(0, i + cs))
+      index = i * pc + j
+      geometry = geometryForGrid(index, prs, pcs, pr, pc)
+      workspace.activeClient.rectangleArgs = [index, prs, pcs, pr, pc]
+      index = -5
+    }
+  }
+
+  if (index == -1 || index == -2) {
+    geometry = center(geometry)
+  }
+
+  if (index != -5) {
+    workspace.activeClient.rectangleArgs = [index, rs, cs, r, c]
+  }
+
+  workspace.activeClient.geometry = geometry
 }
 
 function saveGeometry(client) {
@@ -313,66 +141,67 @@ function restoreGeometry(client) {
   client.clientStepUserMovedResized.disconnect(restoreGeometry)
 }
 
-function shortcut(text, shortcut, placement) {
+function shortcut(text, shortcut, i, rs, cs, r, c) {
   text = 'Rectangle: ' + text
   shortcut = 'Ctrl+Meta+' + shortcut
-  registerShortcut(text, text, shortcut, () => manage(placement))
+  registerShortcut(text, text, shortcut, () => manage(i, rs, cs, r, c))
 }
 
-shortcut('Quarter: Top Left', 'U', divisions.FOURTHS.NW)
-shortcut('Quarter: Top Right', 'I', divisions.FOURTHS.NE)
-shortcut('Quarter: Bottom Left', 'J', divisions.FOURTHS.SW)
-shortcut('Quarter: Bottom Right', 'K', divisions.FOURTHS.SE)
+shortcut('Quarter: Top Left', 'U', 0, 1, 1, 2, 2)
+shortcut('Quarter: Top Right', 'I', 1, 1, 1, 2, 2)
+shortcut('Quarter: Bottom Left', 'J', 2, 1, 1, 2, 2)
+shortcut('Quarter: Bottom Right', 'K', 3, 1, 1, 2, 2)
 
-shortcut('Fourth: First', 'V', divisions.FOURTHS.FIRST)
-shortcut('Fourth: Second', 'B', divisions.FOURTHS.SECOND)
-shortcut('Fourth: Third', 'N', divisions.FOURTHS.THIRD)
-shortcut('Fourth: Fourth', 'M', divisions.FOURTHS.FOURTH)
+shortcut('Fourth: First', 'V', 0, 1, 1, 1, 4)
+shortcut('Fourth: Second', 'B', 1, 1, 1, 1, 4)
+shortcut('Fourth: Third', 'N', 2, 1, 1, 1, 4)
+shortcut('Fourth: Fourth', 'M', 3, 1, 1, 1, 4)
 
-shortcut('Thirds: First', 'D', divisions.THIRDS.LEFT)
-shortcut('Thirds: Second', 'F', divisions.THIRDS.CENTER)
-shortcut('Thirds: Third', 'G', divisions.THIRDS.RIGHT)
+shortcut('Thirds: First', 'D', 0, 1, 1, 1, 3)
+shortcut('Thirds: Second', 'F', 1, 1, 1, 1, 3)
+shortcut('Thirds: Third', 'G', 2, 1, 1, 1, 3)
 
-shortcut('Two Thirds: First', 'E', divisions.THIRDS.TWO_LEFT)
-shortcut('Two Thirds: Center', 'R', divisions.THIRDS.TWO_CENTER)
-shortcut('Two Thirds: Second', 'T', divisions.THIRDS.TWO_RIGHT)
+shortcut('Sixth: Top Left', 'Shift+U', 0, 1, 1, 2, 3)
+shortcut('Sixth: Top Center', 'Shift+I', 1, 1, 1, 2, 3)
+shortcut('Sixth: Top Right', 'Shift+O', 2, 1, 1, 2, 3)
+shortcut('Sixth: Bottom Left', 'Shift+J', 3, 1, 1, 2, 3)
+shortcut('Sixth: Bottom Center', 'Shift+K', 4, 1, 1, 2, 3)
+shortcut('Sixth: Bottom Right', 'Shift+L', 5, 1, 1, 2, 3)
 
-shortcut('Sixth: Top Left', 'Shift+U', divisions.SIXTHS.NW)
-shortcut('Sixth: Top Center', 'Shift+I', divisions.SIXTHS.N)
-shortcut('Sixth: Top Right', 'Shift+O', divisions.SIXTHS.NE)
-shortcut('Sixth: Bottom Left', 'Shift+J', divisions.SIXTHS.SW)
-shortcut('Sixth: Bottom Center', 'Shift+K', divisions.SIXTHS.S)
-shortcut('Sixth: Bottom Right', 'Shift+L', divisions.SIXTHS.SE)
+shortcut('Ninth: Top Left', 'Alt+U', 0, 1, 1, 3, 3)
+shortcut('Ninth: Top Center', 'Alt+I', 1, 1, 1, 3, 3)
+shortcut('Ninth: Top Right', 'Alt+O', 2, 1, 1, 3, 3)
+shortcut('Ninth: Middle Left', 'Alt+J', 3, 1, 1, 3, 3)
+shortcut('Ninth: Middle Center', 'Alt+K', 4, 1, 1, 3, 3)
+shortcut('Ninth: Middle Right', 'Alt+L', 5, 1, 1, 3, 3)
+shortcut('Ninth: Bottom Left', 'Alt+N', 6, 1, 1, 3, 3)
+shortcut('Ninth: Bottom Center', 'Alt+M', 7, 1, 1, 3, 3)
+shortcut('Ninth: Bottom Right', 'Alt+,', 8, 1, 1, 3, 3)
 
-shortcut('Halves: Left', 'Left', divisions.HALVES.LEFT)
-shortcut('Halves: Center', 'Shift+C', divisions.HALVES.CENTER)
-shortcut('Halves: Right', 'Right', divisions.HALVES.RIGHT)
-shortcut('Halves: Top', 'Up', divisions.HALVES.TOP)
-shortcut('Halves: Bottom', 'Down', divisions.HALVES.BOTTOM)
+shortcut('Halves: Center (Vertical)', 'Shift+C', -2, 1, 1, 1, 2)
+shortcut('Halves: Center (Horizontal)', 'Shift+V', -2, 1, 1, 2, 1)
+shortcut('Halves: Left', 'Left', 0, 1, 1, 1, 2)
+shortcut('Halves: Right', 'Right', 1, 1, 1, 1, 2)
+shortcut('Halves: Top', 'Up', 0, 1, 1, 2, 1)
+shortcut('Halves: Bottom', 'Down', 1, 1, 1, 2, 1)
 
-shortcut('Move: Left', 'Alt+Left', divisions.MOVE.LEFT)
-shortcut('Move: Right', 'Alt+Right', divisions.MOVE.RIGHT)
-shortcut('Move: Top', 'Alt+Up', divisions.MOVE.TOP)
-shortcut('Move: Bottom', 'Alt+Down', divisions.MOVE.BOTTOM)
+shortcut('Two Thirds: First', 'E', 0, 1, 2, 1, 3)
+shortcut('Two Thirds: Second', 'T', 1, 1, 2, 1, 3)
+shortcut('Two Thirds: Center', 'R', -2, 1, 2, 1, 3)
 
-shortcut('Maximize Height', 'Shift+Alt+Up', divisions.MAX.HEIGHT)
-shortcut('Maximize Width', 'Shift+Alt+Right', divisions.MAX.WIDTH)
+shortcut('Center', 'C', -1, 1, 1, 1, 1)
+shortcut('Maximized', 'Return', 0, 1, 1, 1, 1)
+shortcut('Centered Quarter', 'Alt+C', -2, 1, 1, 2, 2)
+shortcut('Almost Maximized', 'Shift+Return', 33, 30, 30, 32, 32)
 
-shortcut('Center', 'C', divisions.CENTER)
-shortcut('Maximized', 'Return', divisions.MAX.ALL)
-shortcut('Almost Maximized', 'Shift+Return', divisions.MAX_SPACED)
-shortcut('Centered Quarter', 'Alt+C', divisions.CENTERED_QUARTER)
+shortcut('Maximize Height', 'Shift+Alt+Up', -4, 0, 0, 0, 0)
+shortcut('Maximize Width', 'Shift+Alt+Right', -3, 0, 0, 0, 0)
 
-function registerClient(client) {
-  if (!client.normalWindow) {
-    return
-  }
-  client.clientStartUserMovedResized.connect(restoreGeometry)
-}
-
-function unregisterClient(client) {
-  if (!client.normalWindow) {
-    return
-  }
-  client.clientStepUserMovedResized.disconnect(restoreGeometry)
-}
+shortcut('Move: Left', 'Alt+4', -5, -1, 0, 1, 1)
+shortcut('Move: Right', 'Alt+6', -5, 1, 0, 1, 1)
+shortcut('Move: Top', 'Alt+8', -5, 0, -1, 1, 1)
+shortcut('Move: Bottom', 'Alt+2', -5, 0, 1, 1, 1)
+shortcut('Move: Top Left', 'Alt+7', -5, -1, -1, 1, 1)
+shortcut('Move: Top Right', 'Alt+9', -5, 1, -1, 1, 1)
+shortcut('Move: Bottom Left', 'Alt+1', -5, -1, 1, 1, 1)
+shortcut('Move: Bottom Right', 'Alt+3', -5, 1, 1, 1, 1)
