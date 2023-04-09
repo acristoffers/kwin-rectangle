@@ -12,7 +12,7 @@ X-KDE-PluginInfo-Author=Álan Crístoffer e Sousa
 X-KDE-PluginInfo-Email=acristoffers@startmail.com
 X-KDE-PluginInfo-License=GPL
 X-KDE-PluginInfo-Name=kwin-rectangle
-X-KDE-PluginInfo-Version=1.2.3
+X-KDE-PluginInfo-Version=1.2.4
 X-KDE-PluginInfo-Website=https://github.com/acristoffers/kwin-rectangle
 
 X-KDE-ConfigModule=kwin/effects/configs/kcm_kwin4_genericscripted
