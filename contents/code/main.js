@@ -46,8 +46,8 @@ function center(geometry) {
   return {
     width: geometry.width,
     height: geometry.height,
-    x: Math.round((screen.width - geometry.width) / 2),
-    y: Math.round((screen.height - geometry.height) / 2),
+    x: screen.x + Math.round((screen.width - geometry.width) / 2),
+    y: screen.y + Math.round((screen.height - geometry.height) / 2),
   }
 }
 
