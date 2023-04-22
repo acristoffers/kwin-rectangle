@@ -67,10 +67,6 @@ function manage(index, rs, cs, r, c) {
    * -6: Stretch (resizes to make window touch screen side)
    * -7: Increases window span (rs and cs)
    */
-  if (!workspace.activeClient.normalWindow && !workspace.activeClient.utility) {
-    return
-  }
-
   saveGeometry(workspace.activeClient)
 
   // The object that comes from workspace.activeClient.geometry is weird and
