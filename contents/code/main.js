@@ -52,6 +52,12 @@ function center(geometry) {
 }
 
 function manage(index, rs, cs, r, c) {
+  // Do not modify the geometry of a desktop window. It probably needs to
+  // be fullscreen to display desktop wallpaper and icons.
+  if (workspace.activeClient.desktopWindow) {
+    return;
+  }
+
   /*
    * Index is the zero-index of the square in the grid.
    * For example, if index=2, r=2, c=2, then
