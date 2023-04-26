@@ -17,5 +17,6 @@
   "X-KDE-ParentComponents": ["kwin-rectangle"],
   "X-KDE-PluginKeyword": "kwin-rectangle",
   "X-Plasma-API": "javascript",
-  "X-Plasma-MainScript": "code/main.js"
+  "X-Plasma-MainScript": "code/main.js",
+  "X-KDE-ConfigModule": "kwin/effects/configs/kcm_kwin4_genericscripted"
 }
