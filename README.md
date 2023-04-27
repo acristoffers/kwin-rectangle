@@ -82,6 +82,12 @@ Check if there were no shortcut conflict by going to "System Settings" ->
 "Shortcuts" -> "Global Keyboard Shortcuts" -> "KWin" and searching for
 "Rectangle".
 
+# Animations
+
+This script does not deal with animations, however, the Geometry Change effect
+(https://store.kde.org/p/2026302) will animate the transitions triggered by
+kwin-rectangle.
+
 # Uninstallation
 
 Run `./uninstall.sh`
