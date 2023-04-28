@@ -72,6 +72,23 @@ go to
 `System Settings` -> `Window Management` -> `Window Behaviour` -> `Focus` -> `Multiscreen behaviour`
 and deselect the `Active screen follows mouse` toggle.
 
+# Shortcut Sets
+
+The default shortcut mimics Rectangle's shortcuts, so if you are familiar with
+it, you will be at home here.
+
+If, however, you prefer to use the numberpad for this, there is an
+[numeric set](numeric.kksrc) you can import into Plasma instead. To import it
+open `System Settings` and go to `Shortcuts` and click the `Import Scheme` button
+on the bottom-right of the window. To go back to the default settings you can
+import the [default set](default.kksrc).
+
+# Animations
+
+This script does not deal with animations, however, the Geometry Change effect
+(https://store.kde.org/p/2026302) will animate the transitions triggered by
+kwin-rectangle.
+
 # Installation
 
 Run `./install.sh`
@@ -81,12 +98,6 @@ Activate the plugin from "System Settings" -> "Window management" -> "KWin Scrip
 Check if there were no shortcut conflict by going to "System Settings" ->
 "Shortcuts" -> "Global Keyboard Shortcuts" -> "KWin" and searching for
 "Rectangle".
-
-# Animations
-
-This script does not deal with animations, however, the Geometry Change effect
-(https://store.kde.org/p/2026302) will animate the transitions triggered by
-kwin-rectangle.
 
 # Uninstallation
 
