@@ -164,19 +164,20 @@ function saveGeometry(client) {
   client.snapped = true
 }
 
-function restoreGeometry(client) {
+function restoreGeometry(client, geo) {
   if (!client.snapped || !client.prev_geometry) {
     return
   }
 
-  const geometry = {
-    width: client.prev_geometry.width,
-    height: client.prev_geometry.height,
-    x: client.geometry.x,
-    y: client.geometry.y,
+  if (geo.width == client.geometry.width && geo.height == client.geometry.height) {
+    const geometry = {
+      width: client.prev_geometry.width,
+      height: client.prev_geometry.height,
+      x: client.geometry.x,
+      y: client.geometry.y,
+    }
+    client.geometry = geometry
   }
-
-  client.geometry = geometry
 
   delete client.prev_geometry
   delete client.snapped
