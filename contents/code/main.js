@@ -169,7 +169,14 @@ function restoreGeometry(client) {
     return
   }
 
-  client.geometry = client.prev_geometry
+  const geometry = {
+    width: client.prev_geometry.width,
+    height: client.prev_geometry.height,
+    x: client.geometry.x,
+    y: client.geometry.y,
+  }
+
+  client.geometry = geometry
 
   delete client.prev_geometry
   delete client.snapped
