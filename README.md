@@ -1,3 +1,5 @@
+https://store.kde.org/p/1545864
+
 A kwin script to mimic macOS's Rectangle tiling options in Plasma.
 
 It allows manual tiling with the following shortcuts (configurable in settings):
