@@ -1,6 +1,6 @@
-https://store.kde.org/p/1545864
+# Rectangle
 
-A kwin script to mimic macOS's Rectangle tiling options in Plasma.
+A kwin script to mimic macOS's [Rectangle](https://rectangleapp.com/) tiling options in Plasma.
 
 It allows manual tiling with the following shortcuts (configurable in settings):
 
@@ -92,6 +92,12 @@ This script does not deal with animations, however, the Geometry Change effect
 kwin-rectangle.
 
 # Installation
+
+## Automatic
+
+The extension is available directly in System Settings (Get More button) and at https://store.kde.org/p/1545864.
+
+## Manual
 
 Run `./install.sh`
 
