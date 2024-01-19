@@ -1,194 +1,201 @@
 function screenSize() {
-  return workspace.clientArea(
-    KWin.PlacementArea,
-    workspace.activeScreen,
-    workspace.currentDesktop
-  )
+    return workspace.clientArea(
+        KWin.PlacementArea,
+        workspace.activeScreen,
+        workspace.currentDesktop
+    )
 }
 
 function paddings() {
-  return {
-    inner: readConfig('InnerPadding', 8),
-    outer: readConfig('OuterPadding', 8),
-  }
+    return {
+        inner: readConfig('InnerPadding', 8),
+        outer: readConfig('OuterPadding', 8),
+    }
 }
 
 function geometryForGrid(index, rowSpan, colSpan, rows, cols) {
-  if (index >= rows * cols || index < 0) {
-    return workspace.activeClient.geometry
-  }
+    if (index >= rows * cols || index < 0) {
+        return workspace.activeClient.geometry
+    }
 
-  const screen = screenSize()
-  const pad = paddings()
+    const screen = screenSize()
+    const pad = paddings()
 
-  const availW = screen.width - (cols - 1) * pad.inner - 2 * pad.outer
-  const availH = screen.height - (rows - 1) * pad.inner - 2 * pad.outer
-  const singleWinW = availW / cols
-  const singleWinH = availH / rows
-  const winW = colSpan * singleWinW + (colSpan - 1) * pad.inner
-  const winH = rowSpan * singleWinH + (rowSpan - 1) * pad.inner
+    const availW = screen.width - (cols - 1) * pad.inner - 2 * pad.outer
+    const availH = screen.height - (rows - 1) * pad.inner - 2 * pad.outer
+    const singleWinW = availW / cols
+    const singleWinH = availH / rows
+    const winW = colSpan * singleWinW + (colSpan - 1) * pad.inner
+    const winH = rowSpan * singleWinH + (rowSpan - 1) * pad.inner
 
-  const winJ = index % cols
-  const winI = (index - winJ) / cols
-  const winX = screen.x + pad.outer + winJ * (singleWinW + pad.inner)
-  const winY = screen.y + pad.outer + winI * (singleWinH + pad.inner)
+    const winJ = index % cols
+    const winI = (index - winJ) / cols
+    const winX = screen.x + pad.outer + winJ * (singleWinW + pad.inner)
+    const winY = screen.y + pad.outer + winI * (singleWinH + pad.inner)
 
-  return {
-    width: Math.round(winW),
-    height: Math.round(winH),
-    x: Math.round(winX),
-    y: Math.round(winY),
-  }
+    return {
+        width: Math.round(winW),
+        height: Math.round(winH),
+        x: Math.round(winX),
+        y: Math.round(winY),
+    }
 }
 
 function center(geometry) {
-  const screen = screenSize()
-  return {
-    width: geometry.width,
-    height: geometry.height,
-    x: screen.x + Math.round((screen.width - geometry.width) / 2),
-    y: screen.y + Math.round((screen.height - geometry.height) / 2),
-  }
+    const screen = screenSize()
+    return {
+        width: geometry.width,
+        height: geometry.height,
+        x: screen.x + Math.round((screen.width - geometry.width) / 2),
+        y: screen.y + Math.round((screen.height - geometry.height) / 2),
+    }
 }
 
+/* 
+ * - rs and cs are row and col span, how many cells in the grid will be
+ * taken by the window.
+ * - r and c are the size of the grid.
+ * - Index is the zero-index of the square in the grid.
+ * For example, if index=2, rs=1, cs=1, r=2, c=2, then
+ * you get the first column and second row:
+ * |--0--|--1--|
+ * |##2##|--3--|
+ * If index=2, rs=1, cs=2, r=2, c=2, then
+ * you get the first column and second row and will occupy two cells:
+ * |--0--|--1--|
+ * |##2##|##3##|
+ * Negative indexes have special meanings:
+ * -1: Just center the window
+ * -2: Resize and center
+ * -3: Maximize window's width
+ * -4: Maximize window's height
+ * -5: Move window in rs,cs direction
+ * -6: Stretch (resizes to make window touch screen side)
+ * -7: Increases window span (rs and cs)
+ */
 function manage(index, rs, cs, r, c) {
-  // Do not modify the geometry of a desktop window. It probably needs to
-  // be fullscreen to display desktop wallpaper and icons.
-  if (workspace.activeClient.desktopWindow) {
-    return;
-  }
-
-  /*
-   * Index is the zero-index of the square in the grid.
-   * For example, if index=2, r=2, c=2, then
-   * you get the first column and second row:
-   * |--0--|--1--|
-   * |##2##|--3--|
-   * Negative indexes have special meanings:
-   * -1: Just center the window
-   * -2: Resize and center
-   * -3: Maximize window's width
-   * -4: Maximize window's height
-   * -5: Move window in rs,cs direction
-   * -6: Stretch (resizes to make window touch screen side)
-   * -7: Increases window span (rs and cs)
-   */
-  saveGeometry(workspace.activeClient)
-
-  // The object that comes from workspace.activeClient.geometry is weird and
-  // won't update the size in many cases. It's better to create a new one so
-  // KWin can detect the changes properly
-  let geometry = {
-    width: workspace.activeClient.geometry.width,
-    height: workspace.activeClient.geometry.height,
-    x: workspace.activeClient.geometry.x,
-    y: workspace.activeClient.geometry.y,
-  }
-
-  if (index >= 0) {
-    geometry = geometryForGrid(index, rs, cs, r, c)
-  } else if (index == -1) {
-    geometry = center(geometry)
-  } else if (index == -2) {
-    geometry = geometryForGrid(1, rs, cs, r, c)
-    geometry = center(geometry)
-    workspace.activeClient.rectangleArgs = [0, rs, cs, r, c]
-  } else if (index == -3) {
-    const full = geometryForGrid(0, 1, 1, 1, 1)
-    geometry.x = full.x
-    geometry.width = full.width
-  } else if (index == -4) {
-    const full = geometryForGrid(0, 1, 1, 1, 1)
-    geometry.y = full.y
-    geometry.height = full.height
-  } else if (index == -5 && workspace.activeClient.rectangleArgs != null) {
-    ;[idx, prs, pcs, pr, pc] = workspace.activeClient.rectangleArgs
-    let j = idx % pc
-    let i = (idx - j) / pc
-    j = Math.min(pc - pcs, Math.max(0, j + rs))
-    i = Math.min(pr - prs, Math.max(0, i + cs))
-    idx = i * pc + j
-    geometry = geometryForGrid(idx, prs, pcs, pr, pc)
-    workspace.activeClient.rectangleArgs = [idx, prs, pcs, pr, pc]
-  } else if (index == -6) {
-    const screen = screenSize()
-    const pad = paddings()
-    switch (rs) {
-      case 0:
-        geometry.height += geometry.y - pad.outer
-        geometry.y = pad.outer
-        break
-      case 1:
-        geometry.height = screen.height - pad.outer - geometry.y
-        break
-      case 2:
-        geometry.width += geometry.x - pad.outer
-        geometry.x = pad.outer
-        break
-      case 3:
-        geometry.width = screen.width - pad.outer - geometry.x
-        break
+    // Do not modify the geometry of a desktop window. It probably needs to
+    // be fullscreen to display desktop wallpaper and icons.
+    if (workspace.activeClient.desktopWindow) {
+        return;
     }
-  } else if (index == -7 && workspace.activeClient.rectangleArgs != null) {
-    ;[idx, prs, pcs, pr, pc] = workspace.activeClient.rectangleArgs
-    let j = idx % pc
-    let i = (idx - j) / pc
-    let newj = Math.min(pc - pcs, Math.max(0, j + rs))
-    let newi = Math.min(pr - prs, Math.max(0, i + cs))
-    // Adds colum/row if necessary
-    pcs += j != newj ? 1 : 0
-    prs += i != newi ? 1 : 0
-    // Moves only if newi/newj is smaller (only towards top-left)
-    newj = j < newj ? j : newj
-    newi = i < newi ? i : newi
-    idx = newi * pc + newj
-    geometry = geometryForGrid(idx, prs, pcs, pr, pc)
-    workspace.activeClient.rectangleArgs = [idx, prs, pcs, pr, pc]
-  }
+    
+    saveGeometry(workspace.activeClient)
 
-  if (index >= 0) {
-    workspace.activeClient.rectangleArgs = [index, rs, cs, r, c]
-  }
+    // The object that comes from workspace.activeClient.geometry is weird and
+    // won't update the size in many cases. It's better to create a new one so
+    // KWin can detect the changes properly
+    let geometry = {
+        width: workspace.activeClient.geometry.width,
+        height: workspace.activeClient.geometry.height,
+        x: workspace.activeClient.geometry.x,
+        y: workspace.activeClient.geometry.y,
+    }
 
-  workspace.activeClient.setMaximize(false, false)
-  workspace.activeClient.geometry = geometry
+    if (index >= 0) {
+        geometry = geometryForGrid(index, rs, cs, r, c)
+    } else if (index == -1) {
+        geometry = center(geometry)
+    } else if (index == -2) {
+        geometry = geometryForGrid(1, rs, cs, r, c)
+        geometry = center(geometry)
+        workspace.activeClient.rectangleArgs = [0, rs, cs, r, c]
+    } else if (index == -3) {
+        const full = geometryForGrid(0, 1, 1, 1, 1)
+        geometry.x = full.x
+        geometry.width = full.width
+    } else if (index == -4) {
+        const full = geometryForGrid(0, 1, 1, 1, 1)
+        geometry.y = full.y
+        geometry.height = full.height
+    } else if (index == -5 && workspace.activeClient.rectangleArgs != null) {
+        ;[idx, prs, pcs, pr, pc] = workspace.activeClient.rectangleArgs
+        let j = idx % pc
+        let i = (idx - j) / pc
+        j = Math.min(pc - pcs, Math.max(0, j + rs))
+        i = Math.min(pr - prs, Math.max(0, i + cs))
+        idx = i * pc + j
+        geometry = geometryForGrid(idx, prs, pcs, pr, pc)
+        workspace.activeClient.rectangleArgs = [idx, prs, pcs, pr, pc]
+    } else if (index == -6) {
+        const screen = screenSize()
+        const pad = paddings()
+        switch (rs) {
+            case 0:
+                geometry.height += geometry.y - pad.outer
+                geometry.y = pad.outer
+                break
+            case 1:
+                geometry.height = screen.height - pad.outer - geometry.y
+                break
+            case 2:
+                geometry.width += geometry.x - pad.outer
+                geometry.x = pad.outer
+                break
+            case 3:
+                geometry.width = screen.width - pad.outer - geometry.x
+                break
+        }
+    } else if (index == -7 && workspace.activeClient.rectangleArgs != null) {
+        ;[idx, prs, pcs, pr, pc] = workspace.activeClient.rectangleArgs
+        let j = idx % pc
+        let i = (idx - j) / pc
+        let newj = Math.min(pc - pcs, Math.max(0, j + rs))
+        let newi = Math.min(pr - prs, Math.max(0, i + cs))
+        // Adds colum/row if necessary
+        pcs += j != newj ? 1 : 0
+        prs += i != newi ? 1 : 0
+        // Moves only if newi/newj is smaller (only towards top-left)
+        newj = j < newj ? j : newj
+        newi = i < newi ? i : newi
+        idx = newi * pc + newj
+        geometry = geometryForGrid(idx, prs, pcs, pr, pc)
+        workspace.activeClient.rectangleArgs = [idx, prs, pcs, pr, pc]
+    }
+
+    if (index >= 0) {
+        workspace.activeClient.rectangleArgs = [index, rs, cs, r, c]
+    }
+
+    workspace.activeClient.setMaximize(false, false)
+    workspace.activeClient.geometry = geometry
 }
 
 function saveGeometry(client) {
-  const geometry = {
-    width: client.geometry.width,
-    height: client.geometry.height,
-  }
-  client.clientStepUserMovedResized.connect(restoreGeometry)
-  client.prev_geometry = geometry
-  client.snapped = true
+    const geometry = {
+        width: client.geometry.width,
+        height: client.geometry.height,
+    }
+    client.clientStepUserMovedResized.connect(restoreGeometry)
+    client.prev_geometry = geometry
+    client.snapped = true
 }
 
 function restoreGeometry(client, geo) {
-  if (!client.snapped || !client.prev_geometry) {
-    return
-  }
-
-  if (geo.width == client.geometry.width && geo.height == client.geometry.height) {
-    const geometry = {
-      width: client.prev_geometry.width,
-      height: client.prev_geometry.height,
-      x: client.geometry.x,
-      y: client.geometry.y,
+    if (!client.snapped || !client.prev_geometry) {
+        return
     }
-    client.geometry = geometry
-  }
 
-  delete client.prev_geometry
-  delete client.snapped
+    if (geo.width == client.geometry.width && geo.height == client.geometry.height) {
+        const geometry = {
+            width: client.prev_geometry.width,
+            height: client.prev_geometry.height,
+            x: client.geometry.x,
+            y: client.geometry.y,
+        }
+        client.geometry = geometry
+    }
 
-  client.clientStepUserMovedResized.disconnect(restoreGeometry)
+    delete client.prev_geometry
+    delete client.snapped
+
+    client.clientStepUserMovedResized.disconnect(restoreGeometry)
 }
 
 function shortcut(text, shortcut, i, rs, cs, r, c) {
-  text = 'Rectangle: ' + text
-  shortcut = 'Ctrl+Meta+' + shortcut
-  registerShortcut(text, text, shortcut, () => manage(i, rs, cs, r, c))
+    text = 'Rectangle: ' + text
+    shortcut = 'Ctrl+Meta+' + shortcut
+    registerShortcut(text, text, shortcut, () => manage(i, rs, cs, r, c))
 }
 
 shortcut('Quarter: (1) Top Left', 'U', 0, 1, 1, 2, 2)

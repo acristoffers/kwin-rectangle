@@ -13,6 +13,8 @@ It allows manual tiling with the following shortcuts (configurable in settings):
 - Fourth: (2) Second: `Super+Ctrl+B`
 - Fourth: (3) Third: `Super+Ctrl+N`
 - Fourth: (4) Fourth: `Super+Ctrl+M`
+- Three Fourths: (1) First: `Super+Ctrl+Shift+N`
+- Three Fourths: (2) Second: `Super+Ctrl+Shift+M`
 - Third: (1) First: `Super+Ctrl+D`
 - Third: (2) Second: `Super+Ctrl+F`
 - Third: (3) Third: `Super+Ctrl+G`
