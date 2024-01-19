@@ -202,6 +202,9 @@ shortcut('Fourth: (2) Second', 'B', 1, 1, 1, 1, 4)
 shortcut('Fourth: (3) Third', 'N', 2, 1, 1, 1, 4)
 shortcut('Fourth: (4) Fourth', 'M', 3, 1, 1, 1, 4)
 
+shortcut('Three Fourths: (1) Left', 'Shift+N', 0, 1, 3, 1, 4)
+shortcut('Three Fourths: (2) Right', 'Shift+M', 1, 1, 3, 1, 4)
+
 shortcut('Third: (1) First', 'D', 0, 1, 1, 1, 3)
 shortcut('Third: (2) Second', 'F', 1, 1, 1, 1, 3)
 shortcut('Third: (3) Third', 'G', 2, 1, 1, 1, 3)
