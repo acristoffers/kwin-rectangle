@@ -1,3 +1,5 @@
+let windowProperties = {};
+
 function screenSize() {
     return workspace.clientArea(
         KWin.PlacementArea,
@@ -15,7 +17,7 @@ function paddings() {
 
 function geometryForGrid(index, rowSpan, colSpan, rows, cols) {
     if (index >= rows * cols || index < 0) {
-        return workspace.activeClient.geometry
+        return workspace.activeWindow.frameGeometry
     }
 
     const screen = screenSize()
@@ -76,21 +78,23 @@ function center(geometry) {
 function manage(index, rs, cs, r, c) {
     // Do not modify the geometry of a desktop window. It probably needs to
     // be fullscreen to display desktop wallpaper and icons.
-    if (workspace.activeClient.desktopWindow) {
+    if (workspace.activeWindow.desktopWindow) {
         return;
     }
-    
-    saveGeometry(workspace.activeClient)
 
-    // The object that comes from workspace.activeClient.geometry is weird and
+    saveGeometry(workspace.activeWindow)
+
+    // The object that comes from workspace.activeWindow.frameGeometry is weird and
     // won't update the size in many cases. It's better to create a new one so
     // KWin can detect the changes properly
     let geometry = {
-        width: workspace.activeClient.geometry.width,
-        height: workspace.activeClient.geometry.height,
-        x: workspace.activeClient.geometry.x,
-        y: workspace.activeClient.geometry.y,
+        width: workspace.activeWindow.frameGeometry.width,
+        height: workspace.activeWindow.frameGeometry.height,
+        x: workspace.activeWindow.frameGeometry.x,
+        y: workspace.activeWindow.frameGeometry.y,
     }
+
+    let rectangleArgs = windowProperties[workspace.activeWindow.internalId].args
 
     if (index >= 0) {
         geometry = geometryForGrid(index, rs, cs, r, c)
@@ -99,7 +103,7 @@ function manage(index, rs, cs, r, c) {
     } else if (index == -2) {
         geometry = geometryForGrid(1, rs, cs, r, c)
         geometry = center(geometry)
-        workspace.activeClient.rectangleArgs = [0, rs, cs, r, c]
+        rectangleArgs = [0, rs, cs, r, c]
     } else if (index == -3) {
         const full = geometryForGrid(0, 1, 1, 1, 1)
         geometry.x = full.x
@@ -108,15 +112,15 @@ function manage(index, rs, cs, r, c) {
         const full = geometryForGrid(0, 1, 1, 1, 1)
         geometry.y = full.y
         geometry.height = full.height
-    } else if (index == -5 && workspace.activeClient.rectangleArgs != null) {
-        ;[idx, prs, pcs, pr, pc] = workspace.activeClient.rectangleArgs
+    } else if (index == -5 && rectangleArgs != null) {
+        ;[idx, prs, pcs, pr, pc] = rectangleArgs
         let j = idx % pc
         let i = (idx - j) / pc
         j = Math.min(pc - pcs, Math.max(0, j + rs))
         i = Math.min(pr - prs, Math.max(0, i + cs))
         idx = i * pc + j
         geometry = geometryForGrid(idx, prs, pcs, pr, pc)
-        workspace.activeClient.rectangleArgs = [idx, prs, pcs, pr, pc]
+        rectangleArgs = [idx, prs, pcs, pr, pc]
     } else if (index == -6) {
         const screen = screenSize()
         const pad = paddings()
@@ -136,8 +140,8 @@ function manage(index, rs, cs, r, c) {
                 geometry.width = screen.width - pad.outer - geometry.x
                 break
         }
-    } else if (index == -7 && workspace.activeClient.rectangleArgs != null) {
-        ;[idx, prs, pcs, pr, pc] = workspace.activeClient.rectangleArgs
+    } else if (index == -7 && rectangleArgs != null) {
+        ;[idx, prs, pcs, pr, pc] = rectangleArgs
         let j = idx % pc
         let i = (idx - j) / pc
         let newj = Math.min(pc - pcs, Math.max(0, j + rs))
@@ -150,46 +154,55 @@ function manage(index, rs, cs, r, c) {
         newi = i < newi ? i : newi
         idx = newi * pc + newj
         geometry = geometryForGrid(idx, prs, pcs, pr, pc)
-        workspace.activeClient.rectangleArgs = [idx, prs, pcs, pr, pc]
+        rectangleArgs = [idx, prs, pcs, pr, pc]
     }
 
     if (index >= 0) {
-        workspace.activeClient.rectangleArgs = [index, rs, cs, r, c]
+        rectangleArgs = [index, rs, cs, r, c]
     }
 
-    workspace.activeClient.setMaximize(false, false)
-    workspace.activeClient.geometry = geometry
+    workspace.activeWindow.setMaximize(false, false)
+    workspace.activeWindow.frameGeometry = geometry
+
+    if (rectangleArgs) {
+        windowProperties[workspace.activeWindow.internalId].args = rectangleArgs
+    }
 }
 
 function saveGeometry(client) {
     const geometry = {
-        width: client.geometry.width,
-        height: client.geometry.height,
+        width: client.frameGeometry.width,
+        height: client.frameGeometry.height,
     }
-    client.clientStepUserMovedResized.connect(restoreGeometry)
-    client.prev_geometry = geometry
-    client.snapped = true
+    client.frameGeometryChanged.connect(restoreGeometry)
+
+    if (windowProperties[client.internalId] == null) {
+        windowProperties[client.internalId] = {}
+    }
+
+    windowProperties[client.internalId].prev_geometry = geometry
+    windowProperties[client.internalId].snapped = true
 }
 
 function restoreGeometry(client, geo) {
-    if (!client.snapped || !client.prev_geometry) {
+    props = windowProperties[client.internalId]
+    if (!props || !props.snapped || !props.prev_geometry) {
         return
     }
 
-    if (geo.width == client.geometry.width && geo.height == client.geometry.height) {
+    if (geo.width == client.frameGeometry.width && geo.height == client.frameGeometry.height) {
         const geometry = {
-            width: client.prev_geometry.width,
-            height: client.prev_geometry.height,
+            width: props.prev_geometry.width,
+            height: props.prev_geometry.height,
             x: client.geometry.x,
             y: client.geometry.y,
         }
-        client.geometry = geometry
+        client.frameGeometry = geometry
     }
 
-    delete client.prev_geometry
-    delete client.snapped
+    delete windowProperties[client.internalId]
 
-    client.clientStepUserMovedResized.disconnect(restoreGeometry)
+    client.frameGeometryChanged.disconnect(restoreGeometry)
 }
 
 function shortcut(text, shortcut, i, rs, cs, r, c) {
