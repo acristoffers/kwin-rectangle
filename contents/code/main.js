@@ -1,17 +1,31 @@
 let windowProperties = {};
 
 function screenSize() {
-    return workspace.clientArea(
+    let workarea = workspace.clientArea(
         KWin.PlacementArea,
-        workspace.activeScreen,
-        workspace.currentDesktop
+        workspace.activeWindow,
     )
+    const ms = margins();
+    workarea.x += ms.left;
+    workarea.y += ms.top;
+    workarea.width -= ms.left + ms.right;
+    workarea.height -= ms.top + ms.bottom;
+    return workarea;
 }
 
 function paddings() {
     return {
         inner: readConfig('InnerPadding', 8),
         outer: readConfig('OuterPadding', 8),
+    }
+}
+
+function margins() {
+    return {
+        left: readConfig('MarginLeft', 0),
+        top: readConfig('MarginTop', 0),
+        right: readConfig('MarginRight', 0),
+        bottom: readConfig('MarginBottom', 0),
     }
 }
 
