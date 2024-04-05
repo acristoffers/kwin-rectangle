@@ -96,7 +96,12 @@ function manage(index, rs, cs, r, c) {
         return;
     }
 
-    saveGeometry(workspace.activeWindow)
+    // KWin 6.0 changed the way that change signals work, so we need to grab a copy
+    // of the geometry and save it after snapping rather than before like we used to.
+    const prevGeometry = {
+        width: workspace.activeWindow.frameGeometry.width,
+        height: workspace.activeWindow.frameGeometry.height,
+    }
 
     // The object that comes from workspace.activeWindow.frameGeometry is weird and
     // won't update the size in many cases. It's better to create a new one so
@@ -108,7 +113,7 @@ function manage(index, rs, cs, r, c) {
         y: workspace.activeWindow.frameGeometry.y,
     }
 
-    let rectangleArgs = windowProperties[workspace.activeWindow.internalId].args
+    let rectangleArgs = windowProperties?.[workspace.activeWindow.internalId]?.args
 
     if (index >= 0) {
         geometry = geometryForGrid(index, rs, cs, r, c)
@@ -178,29 +183,46 @@ function manage(index, rs, cs, r, c) {
     workspace.activeWindow.setMaximize(false, false)
     workspace.activeWindow.frameGeometry = geometry
 
+    saveGeometry(workspace.activeWindow, geometry, prevGeometry, rectangleArgs)
+}
+
+function saveGeometry(client, newGeometry, prevGeometry, rectangleArgs) {
+    client.frameGeometryChanged.connect((geo) => restoreGeometry(client, geo))
+
+    if (typeof windowProperties[client.internalId] !== 'object') {
+        windowProperties[client.internalId] = {}
+    }
+
+    if (!windowProperties[client.internalId].snapped) {
+        windowProperties[client.internalId].prev_geometry = prevGeometry
+    }
+
+    windowProperties[client.internalId].snapped_geometry = newGeometry
+    windowProperties[client.internalId].snapped = true
+
     if (rectangleArgs) {
         windowProperties[workspace.activeWindow.internalId].args = rectangleArgs
     }
 }
 
-function saveGeometry(client) {
-    const geometry = {
-        width: client.frameGeometry.width,
-        height: client.frameGeometry.height,
-    }
-    client.frameGeometryChanged.connect(restoreGeometry)
-
-    if (windowProperties[client.internalId] == null) {
-        windowProperties[client.internalId] = {}
-    }
-
-    windowProperties[client.internalId].prev_geometry = geometry
-    windowProperties[client.internalId].snapped = true
-}
-
 function restoreGeometry(client, geo) {
     props = windowProperties[client.internalId]
-    if (!props || !props.snapped || !props.prev_geometry) {
+    if (!props || !props.snapped || !props.prev_geometry || !props.snapped_geometry) {
+        return
+    }
+
+    // the frameGeometryChanged signal is not fired immediately after the frameGeometry is set
+    if (props.prev_geometry.width == geo.width && props.prev_geometry.height == geo.height) {
+        return
+    }
+
+    // we don't want to delete the properties if the window is resnapped
+    if (
+        props.snapped_geometry.width == client.frameGeometry.width &&
+        props.snapped_geometry.height == client.frameGeometry.height &&
+        props.snapped_geometry.x == client.frameGeometry.x &&
+        props.snapped_geometry.y == client.frameGeometry.y
+    ) {
         return
     }
 
@@ -208,9 +230,11 @@ function restoreGeometry(client, geo) {
         const geometry = {
             width: props.prev_geometry.width,
             height: props.prev_geometry.height,
-            x: client.geometry.x,
-            y: client.geometry.y,
+            x: client.frameGeometry.x,
+            y: client.frameGeometry.y,
         }
+
+        client.setMaximize(false, false)
         client.frameGeometry = geometry
     }
 
