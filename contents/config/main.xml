@@ -1,27 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0 http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
-
   <kcfgfile name="" />
   <group name="">
-    <entry name="InnerPadding" type="int">
+    <entry name="InnerPadding" type="Int">
       <default>8</default>
     </entry>
-    <entry name="OuterPadding" type="int">
+    <entry name="OuterPadding" type="Int">
       <default>8</default>
     </entry>
-    <entry name="MarginLeft" type="int">
+    <entry name="MarginLeft" type="Int">
       <default>0</default>
     </entry>
-    <entry name="MarginTop" type="int">
+    <entry name="Margintop" type="Int">
       <default>0</default>
     </entry>
-    <entry name="MarginRight" type="int">
+    <entry name="MarginRight" type="Int">
       <default>0</default>
     </entry>
-    <entry name="MarginBottom" type="int">
+    <entry name="MarginBottom" type="Int">
       <default>0</default>
+    </entry>
+    <entry name="ResizeOnUnsnap" type="Bool">
+      <default>true</default>
     </entry>
   </group>
 </kcfg>
