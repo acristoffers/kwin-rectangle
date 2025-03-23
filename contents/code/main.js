@@ -71,7 +71,7 @@ function center(geometry) {
     }
 }
 
-/* 
+/*
  * - rs and cs are row and col span, how many cells in the grid will be
  * taken by the window.
  * - r and c are the size of the grid.
@@ -118,6 +118,18 @@ function manage(index, rs, cs, r, c) {
     }
 
     let rectangleArgs = windowProperties?.[workspace.activeWindow.internalId]?.args
+    let now = Date.now()
+
+    if (index >= 0
+        && rectangleArgs != null
+        && rectangleArgs[0] == index
+        && rectangleArgs[1] == rs
+        && rectangleArgs[2] == cs
+        && rectangleArgs[3] == r
+        && rectangleArgs[4] == c
+        && Math.abs(now - rectangleArgs[5]) < 1000) {
+        index = (rectangleArgs[0] + 1) % (r * c)
+    }
 
     if (index >= 0) {
         geometry = geometryForGrid(index, rs, cs, r, c)
@@ -126,7 +138,7 @@ function manage(index, rs, cs, r, c) {
     } else if (index == -2) {
         geometry = geometryForGrid(1, rs, cs, r, c)
         geometry = center(geometry)
-        rectangleArgs = [0, rs, cs, r, c]
+        rectangleArgs = [0, rs, cs, r, c, now]
     } else if (index == -3) {
         const full = geometryForGrid(0, 1, 1, 1, 1)
         geometry.x = full.x
@@ -136,14 +148,14 @@ function manage(index, rs, cs, r, c) {
         geometry.y = full.y
         geometry.height = full.height
     } else if (index == -5 && rectangleArgs != null) {
-        ;[idx, prs, pcs, pr, pc] = rectangleArgs
+        ;[idx, prs, pcs, pr, pc, _] = rectangleArgs
         let j = idx % pc
         let i = (idx - j) / pc
         j = Math.min(pc - pcs, Math.max(0, j + rs))
         i = Math.min(pr - prs, Math.max(0, i + cs))
         idx = i * pc + j
         geometry = geometryForGrid(idx, prs, pcs, pr, pc)
-        rectangleArgs = [idx, prs, pcs, pr, pc]
+        rectangleArgs = [idx, prs, pcs, pr, pc, now]
     } else if (index == -6) {
         const screen = screenSize()
         const pad = paddings()
@@ -164,7 +176,7 @@ function manage(index, rs, cs, r, c) {
                 break
         }
     } else if (index == -7 && rectangleArgs != null) {
-        ;[idx, prs, pcs, pr, pc] = rectangleArgs
+        ;[idx, prs, pcs, pr, pc, _] = rectangleArgs
         let j = idx % pc
         let i = (idx - j) / pc
         let newj = Math.min(pc - pcs, Math.max(0, j + rs))
@@ -177,11 +189,11 @@ function manage(index, rs, cs, r, c) {
         newi = i < newi ? i : newi
         idx = newi * pc + newj
         geometry = geometryForGrid(idx, prs, pcs, pr, pc)
-        rectangleArgs = [idx, prs, pcs, pr, pc]
+        rectangleArgs = [idx, prs, pcs, pr, pc, now]
     }
 
     if (index >= 0) {
-        rectangleArgs = [index, rs, cs, r, c]
+        rectangleArgs = [index, rs, cs, r, c, now]
     }
 
     workspace.activeWindow.setMaximize(false, false)
