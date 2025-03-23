@@ -13,7 +13,7 @@
     "License": "GPL",
     "Name": "KWin Rectangle",
     "ServiceTypes": ["KWin/Script"],
-    "Version": "1.3.4"
+    "Version": "1.3.5"
   },
   "X-KDE-ParentComponents": ["kwin-rectangle"],
   "X-KDE-PluginKeyword": "kwin-rectangle",
