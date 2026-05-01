@@ -94,30 +94,35 @@ function center(geometry) {
  * -7: Increases window span (rs and cs)
  */
 function manage(index, rs, cs, r, c) {
+    const client = workspace.activeWindow
+    if (!client) {
+        return
+    }
+
     // Do not modify the geometry of a desktop window. It probably needs to
     // be fullscreen to display desktop wallpaper and icons.
-    if (workspace.activeWindow.desktopWindow) {
+    if (client.desktopWindow) {
         return;
     }
 
     // KWin 6.0 changed the way that change signals work, so we need to grab a copy
     // of the geometry and save it after snapping rather than before like we used to.
     const prevGeometry = {
-        width: workspace.activeWindow.frameGeometry.width,
-        height: workspace.activeWindow.frameGeometry.height,
+        width: client.frameGeometry.width,
+        height: client.frameGeometry.height,
     }
 
     // The object that comes from workspace.activeWindow.frameGeometry is weird and
     // won't update the size in many cases. It's better to create a new one so
     // KWin can detect the changes properly
     let geometry = {
-        width: workspace.activeWindow.frameGeometry.width,
-        height: workspace.activeWindow.frameGeometry.height,
-        x: workspace.activeWindow.frameGeometry.x,
-        y: workspace.activeWindow.frameGeometry.y,
+        width: client.frameGeometry.width,
+        height: client.frameGeometry.height,
+        x: client.frameGeometry.x,
+        y: client.frameGeometry.y,
     }
 
-    let rectangleArgs = windowProperties?.[workspace.activeWindow.internalId]?.args
+    let rectangleArgs = windowProperties?.[client.internalId]?.args
     let now = Date.now()
 
     if (index >= 0
@@ -148,6 +153,7 @@ function manage(index, rs, cs, r, c) {
         geometry.y = full.y
         geometry.height = full.height
     } else if (index == -5 && rectangleArgs != null) {
+        let idx, prs, pcs, pr, pc
         ;[idx, prs, pcs, pr, pc, _] = rectangleArgs
         let j = idx % pc
         let i = (idx - j) / pc
@@ -176,6 +182,7 @@ function manage(index, rs, cs, r, c) {
                 break
         }
     } else if (index == -7 && rectangleArgs != null) {
+        let idx, prs, pcs, pr, pc
         ;[idx, prs, pcs, pr, pc, _] = rectangleArgs
         let j = idx % pc
         let i = (idx - j) / pc
@@ -196,10 +203,20 @@ function manage(index, rs, cs, r, c) {
         rectangleArgs = [index, rs, cs, r, c, now]
     }
 
-    workspace.activeWindow.setMaximize(false, false)
-    workspace.activeWindow.frameGeometry = geometry
+    // Disconnect the geometry-change handler before touching frameGeometry so
+    // restoreGeometry cannot fire between setMaximize/frameGeometry and
+    // saveGeometry (which would see a stale snapped_geometry and incorrectly
+    // restore the window to a previous direction).
+    const existingProps = windowProperties?.[client.internalId]
+    if (existingProps?.geometryHandler) {
+        client.frameGeometryChanged.disconnect(existingProps.geometryHandler)
+        delete existingProps.geometryHandler
+    }
 
-    saveGeometry(workspace.activeWindow, geometry, prevGeometry, rectangleArgs)
+    client.setMaximize(false, false)
+    client.frameGeometry = geometry
+
+    saveGeometry(client, geometry, prevGeometry, rectangleArgs)
 }
 
 function saveGeometry(client, newGeometry, prevGeometry, rectangleArgs) {
@@ -207,34 +224,47 @@ function saveGeometry(client, newGeometry, prevGeometry, rectangleArgs) {
         windowProperties[client.internalId] = {}
     }
 
+    const props = windowProperties[client.internalId]
+
     if (rectangleArgs) {
-        windowProperties[client.internalId].args = rectangleArgs
+        props.args = rectangleArgs
     }
 
     if (restoreOnUnsnap()) {
-        client.frameGeometryChanged.connect(restoreGeometry)
-
-        if (!windowProperties[client.internalId].snapped) {
-            windowProperties[client.internalId].prev_geometry = prevGeometry
+        if (!props.geometryHandler) {
+            props.geometryHandler = (geo) => restoreGeometry(client, geo)
+            client.frameGeometryChanged.connect(props.geometryHandler)
         }
 
-        windowProperties[client.internalId].snapped_geometry = newGeometry
-        windowProperties[client.internalId].snapped = true
+        if (!props.snapped) {
+            props.prev_geometry = prevGeometry
+        }
+
+        props.snapped_geometry = newGeometry
+        props.snapped = true
     } else {
-        delete windowProperties[client.internalId].prev_geometry
-        delete windowProperties[client.internalId].snapped
-        delete windowProperties[client.internalId].snapped_geometry
+        if (props.geometryHandler) {
+            client.frameGeometryChanged.disconnect(props.geometryHandler)
+            delete props.geometryHandler
+        }
+
+        delete props.prev_geometry
+        delete props.snapped
+        delete props.snapped_geometry
     }
 }
 
-function restoreGeometry(geo) {
+function restoreGeometry(client, geo) {
     if (!restoreOnUnsnap()) {
         return
     }
 
-    props = windowProperties[workspace.activeWindow.internalId]
+    const props = windowProperties[client.internalId]
     if (!props || !props.snapped || !props.prev_geometry || !props.snapped_geometry) {
-        workspace.activeWindow.frameGeometryChanged.disconnect(restoreGeometry)
+        if (props?.geometryHandler) {
+            client.frameGeometryChanged.disconnect(props.geometryHandler)
+            delete props.geometryHandler
+        }
         return
     }
 
@@ -245,29 +275,31 @@ function restoreGeometry(geo) {
 
     // we don't want to delete the properties if the window is resnapped
     if (
-        props.snapped_geometry.width == workspace.activeWindow.frameGeometry.width &&
-        props.snapped_geometry.height == workspace.activeWindow.frameGeometry.height &&
-        props.snapped_geometry.x == workspace.activeWindow.frameGeometry.x &&
-        props.snapped_geometry.y == workspace.activeWindow.frameGeometry.y
+        props.snapped_geometry.width == client.frameGeometry.width &&
+        props.snapped_geometry.height == client.frameGeometry.height &&
+        props.snapped_geometry.x == client.frameGeometry.x &&
+        props.snapped_geometry.y == client.frameGeometry.y
     ) {
         return
     }
 
-    if (geo.width == workspace.activeWindow.frameGeometry.width && geo.height == workspace.activeWindow.frameGeometry.height) {
+    if (geo.width == client.frameGeometry.width && geo.height == client.frameGeometry.height) {
         const geometry = {
             width: props.prev_geometry.width,
             height: props.prev_geometry.height,
-            x: workspace.activeWindow.frameGeometry.x,
-            y: workspace.activeWindow.frameGeometry.y,
+            x: client.frameGeometry.x,
+            y: client.frameGeometry.y,
         }
 
-        workspace.activeWindow.setMaximize(false, false)
-        workspace.activeWindow.frameGeometry = geometry
+        client.setMaximize(false, false)
+        client.frameGeometry = geometry
     }
 
-    delete windowProperties[workspace.activeWindow.internalId]
+    delete windowProperties[client.internalId]
 
-    workspace.activeWindow.frameGeometryChanged.disconnect(restoreGeometry)
+    if (props.geometryHandler) {
+        client.frameGeometryChanged.disconnect(props.geometryHandler)
+    }
 }
 
 function shortcut(text, shortcut, i, rs, cs, r, c) {
