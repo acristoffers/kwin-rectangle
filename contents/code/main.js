@@ -92,6 +92,7 @@ function center(geometry) {
  * -5: Move window in rs,cs direction
  * -6: Stretch (resizes to make window touch screen side)
  * -7: Increases window span (rs and cs)
+ * -8: Cycle left/right
  */
 function manage(index, rs, cs, r, c) {
     const client = workspace.activeWindow
@@ -197,6 +198,35 @@ function manage(index, rs, cs, r, c) {
         idx = newi * pc + newj
         geometry = geometryForGrid(idx, prs, pcs, pr, pc)
         rectangleArgs = [idx, prs, pcs, pr, pc, now]
+    } else if (index == -8) {
+        const gs = rs == 0 ? [ // left
+            [0, 1, 1, 1, 2],
+            [0, 1, 2, 1, 3],
+            [0, 1, 3, 1, 4],
+            [0, 1, 1, 1, 4],
+            [0, 1, 1, 1, 3],
+        ] : [ // right
+            [1, 1, 1, 1, 2],
+            [1, 1, 2, 1, 3],
+            [1, 1, 3, 1, 4],
+            [3, 1, 1, 1, 4],
+            [2, 1, 1, 1, 3],
+        ]
+        if (rectangleArgs == null) {
+            rectangleArgs = [...gs[0], 0]
+        }
+        let i = 0
+        if (Math.abs(now - rectangleArgs[5]) < 1000) {
+            i = gs.findIndex(g =>
+                g[0] == rectangleArgs[0]
+                && g[1] == rectangleArgs[1]
+                && g[2] == rectangleArgs[2]
+                && g[3] == rectangleArgs[3]
+                && g[4] == rectangleArgs[4])
+            i = (i + 1) % 5
+        }
+        geometry = geometryForGrid(...gs[i])
+        rectangleArgs = [...gs[i], now]
     }
 
     if (index >= 0) {
@@ -345,8 +375,8 @@ shortcut('Ninth: (9) Bottom Right', 'Alt+,', 8, 1, 1, 3, 3)
 
 shortcut('Half: (1) Center (Vertical)', 'Shift+C', -2, 1, 1, 1, 2)
 shortcut('Half: (1) Center (Horizontal)', 'Shift+V', -2, 1, 1, 2, 1)
-shortcut('Half: (2) Left', 'Left', 0, 1, 1, 1, 2)
-shortcut('Half: (2) Right', 'Right', 1, 1, 1, 1, 2)
+shortcut('Half: (2) Left', 'Left', -8, 0, 0, 0, 0)
+shortcut('Half: (2) Right', 'Right', -8, 1, 0, 0, 0)
 shortcut('Half: (3) Top', 'Up', 0, 1, 1, 2, 1)
 shortcut('Half: (3) Bottom', 'Down', 1, 1, 1, 2, 1)
 
