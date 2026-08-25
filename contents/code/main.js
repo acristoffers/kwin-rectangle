@@ -33,6 +33,20 @@ function margins() {
     }
 }
 
+function rotateOnPortrait() {
+    return readConfig('RotateOnPortrait', false)
+}
+
+// Only transpose the grid when the screen is in portrait mode and 
+// the grid is a single row with at least 3 columns
+function shouldTranspose(rows, cols) {
+    if (!rotateOnPortrait() || rows !== 1 || cols < 3) {
+        return false
+    }
+    const screen = screenSize()
+    return screen.height > screen.width
+}
+
 function geometryForGrid(index, rowSpan, colSpan, rows, cols) {
     if (index >= rows * cols || index < 0) {
         return workspace.activeWindow.frameGeometry
@@ -41,6 +55,24 @@ function geometryForGrid(index, rowSpan, colSpan, rows, cols) {
     const screen = screenSize()
     const pad = paddings()
 
+    let winJ = index % cols
+    let winI = (index - winJ) / cols
+
+    // Flips the grid onto the long axis of a portrait screen
+    if (shouldTranspose(rows, cols)) {
+        const gridTmp = rows
+        rows = cols
+        cols = gridTmp
+
+        const spanTmp = rowSpan
+        rowSpan = colSpan
+        colSpan = spanTmp
+
+        const cellTmp = winI
+        winI = winJ
+        winJ = cellTmp
+    }
+
     const availW = screen.width - (cols - 1) * pad.inner - 2 * pad.outer
     const availH = screen.height - (rows - 1) * pad.inner - 2 * pad.outer
     const singleWinW = availW / cols
@@ -48,8 +80,6 @@ function geometryForGrid(index, rowSpan, colSpan, rows, cols) {
     const winW = colSpan * singleWinW + (colSpan - 1) * pad.inner
     const winH = rowSpan * singleWinH + (rowSpan - 1) * pad.inner
 
-    const winJ = index % cols
-    const winI = (index - winJ) / cols
     const winX = screen.x + pad.outer + winJ * (singleWinW + pad.inner)
     const winY = screen.y + pad.outer + winI * (singleWinH + pad.inner)
 
@@ -156,6 +186,12 @@ function manage(index, rs, cs, r, c) {
     } else if (index == -5 && rectangleArgs != null) {
         let idx, prs, pcs, pr, pc
         ;[idx, prs, pcs, pr, pc, _] = rectangleArgs
+        // When the grid is flipped, move along the long axis instead of the short axis
+        if (shouldTranspose(pr, pc)) {
+            const stepTmp = rs
+            rs = cs
+            cs = stepTmp
+        }
         let j = idx % pc
         let i = (idx - j) / pc
         j = Math.min(pc - pcs, Math.max(0, j + rs))
@@ -185,6 +221,12 @@ function manage(index, rs, cs, r, c) {
     } else if (index == -7 && rectangleArgs != null) {
         let idx, prs, pcs, pr, pc
         ;[idx, prs, pcs, pr, pc, _] = rectangleArgs
+        // Swaps the steps when the grid is flipped, same as -5 above.
+        if (shouldTranspose(pr, pc)) {
+            const stepTmp = rs
+            rs = cs
+            cs = stepTmp
+        }
         let j = idx % pc
         let i = (idx - j) / pc
         let newj = Math.min(pc - pcs, Math.max(0, j + rs))
