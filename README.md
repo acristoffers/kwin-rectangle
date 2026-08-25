@@ -68,6 +68,30 @@ It allows manual tiling with the following shortcuts (configurable in settings):
 - Move: Top: `Super+Ctrl+Alt+8`
 - Move: Top Right: `Super+Ctrl+Alt+9`
 
+# Portrait Screens
+
+By default the orientation of a screen makes no difference, so thirds are three
+columns even on a monitor that is taller than it is wide, which leaves three
+narrow slivers.
+
+Enabling `Split thirds and fourths along the long axis` in the settings changes
+that. When the height of a screen is greater than its width, a layout that would
+otherwise cut the width into three or more columns is flipped onto the long axis
+instead:
+
+- `Third: First` is the top band rather than the left column.
+- `Two Thirds: Left` is the top two thirds.
+- `Fourth` and `Three Fourths` flip the same way.
+
+The rest is left alone. Halves keep splitting left and right, because two
+columns are still usable on a portrait screen and `Half: Top` already runs along
+the long axis. Quarters, sixths and ninths divide on two axes, so flipping them
+would change what the shortcuts mean and `Quarter: Top Right` would land on the
+bottom left.
+
+`Move` and `Stretch: Step` follow the flipped layout, so they still move a
+window in the direction that was asked for.
+
 # Multi-monitor Quirk
 
 Kwin, by default, has a focus-follows-mouse policy, meaning that the tilling operation will
