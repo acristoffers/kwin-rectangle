@@ -37,7 +37,7 @@ function rotateOnPortrait() {
     return readConfig('RotateOnPortrait', false)
 }
 
-// Only transpose the grid when the screen is in portrait mode and 
+// Only transpose the grid when the screen is in portrait mode and
 // the grid is a single row with at least 3 columns
 function shouldTranspose(rows, cols) {
     if (!rotateOnPortrait() || rows !== 1 || cols < 3) {
